@@ -49,6 +49,7 @@ namespace WebApplication.Repositories
                 Name = updateEmployee.Name,
                 Job = updateEmployee.Job,
                 DOB = updateEmployee.DOB ?? oldDob
+
             };
 
             return await connection.ExecuteAsync(sql, parameters);
