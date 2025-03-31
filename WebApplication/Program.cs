@@ -1,5 +1,5 @@
-using WebApplication.Data;
-using Microsoft.EntityFrameworkCore;
+using WebApplication.Models.Entities;
+using WebApplication.Repositories;
 
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
@@ -10,7 +10,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultCollection")));
+builder.Services.AddScoped<IEmployeesRepository, EmployeeRepository>();
+
 
 var app = builder.Build();
 

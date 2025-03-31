@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using WebApplication.Data;
-using WebApplication.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebApplication.Models.Entities;
 
 namespace WebApplication.Controllers
@@ -10,86 +7,66 @@ namespace WebApplication.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly ApplicationDBContext _dbContext;
-        public EmployeesController(ApplicationDBContext dbContext)
+        private readonly IEmployeesRepository _dbContext;
+        public EmployeesController(IEmployeesRepository dbContext)
         {
             _dbContext = dbContext;
         }
 
         [HttpGet]
-        public IActionResult GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees()
         {
-            return Ok(_dbContext.Employees.ToList());
+            var employees = await _dbContext.GetAllEmployees();
+            return Ok(employees);
         }
 
         [HttpGet]
         [Route("{id:guid}")]
-        public IActionResult GetEmployeesById(Guid id) { 
-            var employee = _dbContext.Employees.Find(id);
+        public async Task<IActionResult> GetEmployeeById(Guid id)
+        {
+            var employee = await _dbContext.GetEmployeeById(id);
 
-            if(employee is null)
-            {
-                return NotFound();
-            }
+            if (employee == null) return NotFound();
 
             return Ok(employee);
         }
 
         [HttpPost]
-        public IActionResult AddEmployees(AddEmployeeDto addEmployeeDto)
+        public async Task<IActionResult> CreateEmployee(Employee employee)
         {
 
-            var employeeEntity = new Employee()
-            {
-                Name = addEmployeeDto.Name,
-                Job = addEmployeeDto.Job,
-                DOB = addEmployeeDto.DOB,
-            };
+            var result = await _dbContext.AddEmployee(employee);
 
-            _dbContext.Employees.Add(employeeEntity);
-            _dbContext.SaveChanges();
-
-            return Ok(employeeEntity);
+            return result > 0 ? Ok(employee) : BadRequest("Create employee fail!");
         }
 
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult UpdateEmployee(Guid id, UpdateEmployee updateEmployee)
+        public async Task<IActionResult> UpdateEmployee(Guid id, UpdateEmployee updateEmployee)
         {
-            var employee = _dbContext.Employees.Find(id);
-            
-            if (employee is null)
-            {
-                return NotFound();
-            };
+            var employee = await _dbContext.UpdateEmployee(id, updateEmployee);
 
-            employee.Name = updateEmployee.Name;
-            employee.Job = updateEmployee.Job;
-            if (updateEmployee.DOB.HasValue)
+            if (employee == 0)
             {
-                employee.DOB = updateEmployee.DOB;
+                return NotFound("Not found employee!");
             }
 
-            _dbContext.SaveChanges();
-
-            return Ok(employee);
+            return Ok("Update successed!");
         }
 
         [HttpDelete]
         [Route("{id:guid}")]
-        public IActionResult DeleteEmployee(Guid id) 
+        public async Task<IActionResult> DeleteEmployee(Guid id)
         {
-            var employee = _dbContext.Employees.Find(id);
+            var employee = await _dbContext.DeleteEmployee(id);
 
-            if(employee is null)
+            if (employee == 0)
             {
-                return NotFound();
-            };
+                return NotFound("Not found employee!");
+            }
+            ;
 
-            _dbContext.Employees.Remove(employee);
-            _dbContext.SaveChanges();
-
-            return Ok(employee);
+            return Ok("Delete successed!");
         }
     }
 }
