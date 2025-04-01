@@ -1,9 +1,12 @@
+using FluentValidation;
 using WebApplication.Models.Entities;
 using WebApplication.Repositories;
+using WebApplication.Validator;
 
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddScoped<IValidator<Employee>, EmployeeValidator>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

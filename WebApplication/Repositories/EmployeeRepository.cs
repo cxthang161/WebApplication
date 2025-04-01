@@ -6,7 +6,7 @@ namespace WebApplication.Repositories
 {
     public class EmployeeRepository : IEmployeesRepository
     {
-        private readonly string _dbContext;
+        private readonly string? _dbContext;
 
         public EmployeeRepository(IConfiguration configuration)
         {
@@ -35,17 +35,17 @@ namespace WebApplication.Repositories
             return await connection.ExecuteAsync(sql, employee);
         }
 
-        public async Task<int> UpdateEmployee(Guid id, UpdateEmployee updateEmployee)
+        public async Task<int> UpdateEmployee(Employee updateEmployee)
         {
             using var connection = new SqlConnection(_dbContext);
 
             string getEmployeeSql = "SELECT DOB FROM Employees WHERE Id = @Id";
-            var oldDob = await connection.QueryFirstOrDefaultAsync<DateTime?>(getEmployeeSql, new { Id = id });
+            var oldDob = await connection.QueryFirstOrDefaultAsync<DateTime?>(getEmployeeSql, new { Id = updateEmployee.Id });
 
             string sql = "UPDATE Employees SET Name = @Name, Job = @Job, DOB = @DOB WHERE Id = @Id";
             var parameters = new
             {
-                Id = id,
+                Id = updateEmployee.Id,
                 Name = updateEmployee.Name,
                 Job = updateEmployee.Job,
                 DOB = updateEmployee.DOB ?? oldDob
