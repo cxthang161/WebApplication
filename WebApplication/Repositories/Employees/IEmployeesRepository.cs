@@ -1,6 +1,6 @@
 ﻿using WebApplication.Models.Entities;
 
-namespace WebApplication.Repositories
+namespace WebApplication.Repositories.Employees
 {
     public interface IEmployeesRepository
     {

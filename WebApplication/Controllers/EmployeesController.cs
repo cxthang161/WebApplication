@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication.Models.Entities;
-using WebApplication.Repositories;
+using WebApplication.Repositories.Employees;
 
 namespace WebApplication.Controllers
 {
@@ -36,6 +37,7 @@ namespace WebApplication.Controllers
             return Ok(employee);
         }
 
+        [Authorize]
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> CreateEmployee(Employee employee)
@@ -52,6 +54,7 @@ namespace WebApplication.Controllers
             return result > 0 ? Ok(employee) : BadRequest("Create employee failed!");
         }
 
+        [Authorize]
         [HttpPut]
         [Route("update/{id:guid}")]
         public async Task<IActionResult> UpdateEmployee(Guid id, UpdateEmployee updateEmployee)
@@ -80,6 +83,7 @@ namespace WebApplication.Controllers
             return Ok("Update successed!");
         }
 
+        [Authorize]
         [HttpDelete]
         [Route("delete/{id:guid}")]
         public async Task<IActionResult> DeleteEmployee(Guid id)

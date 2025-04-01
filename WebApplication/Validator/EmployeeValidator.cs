@@ -5,7 +5,7 @@ namespace WebApplication.Validator
 {
     public class EmployeeValidator : AbstractValidator<Employee>
     {
-        private readonly List<string> validJobs = new() { "Developer", "QC", "BA", "Manager", "QA", "Tester" };
+        private readonly List<string> validJobs = new() { "Developer", "QC", "BA", "Manager", "QA", "Tester", "DA" };
 
         private bool BeAtLeast18YearsOld(DateTime? dob)
         {

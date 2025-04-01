@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using WebApplication.Models.Entities;
 
-namespace WebApplication.Repositories
+namespace WebApplication.Repositories.Employees
 {
     public class EmployeeRepository : IEmployeesRepository
     {
@@ -40,14 +40,14 @@ namespace WebApplication.Repositories
             using var connection = new SqlConnection(_dbContext);
 
             string getEmployeeSql = "SELECT DOB FROM Employees WHERE Id = @Id";
-            var oldDob = await connection.QueryFirstOrDefaultAsync<DateTime?>(getEmployeeSql, new { Id = updateEmployee.Id });
+            var oldDob = await connection.QueryFirstOrDefaultAsync<DateTime?>(getEmployeeSql, new { updateEmployee.Id });
 
             string sql = "UPDATE Employees SET Name = @Name, Job = @Job, DOB = @DOB WHERE Id = @Id";
             var parameters = new
             {
-                Id = updateEmployee.Id,
-                Name = updateEmployee.Name,
-                Job = updateEmployee.Job,
+                updateEmployee.Id,
+                updateEmployee.Name,
+                updateEmployee.Job,
                 DOB = updateEmployee.DOB ?? oldDob
 
             };
