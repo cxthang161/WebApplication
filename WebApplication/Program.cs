@@ -16,9 +16,6 @@ var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IValidator<Employee>, EmployeeValidator>();
 builder.Services.AddScoped<IValidator<Users>, UserValidatior>();
 
-// Add config JWT
-builder.Services.AddSingleton<TokenProvider>();
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -26,6 +23,9 @@ builder.Services.AddSwagerGenWithAuth();
 
 builder.Services.AddScoped<IEmployeesRepository, EmployeeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Add config JWT
+builder.Services.AddSingleton<TokenProvider>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

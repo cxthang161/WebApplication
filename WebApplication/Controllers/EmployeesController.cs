@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication.Models.Common;
 using WebApplication.Models.Entities;
 using WebApplication.Repositories.Employees;
 
@@ -20,10 +21,18 @@ namespace WebApplication.Controllers
 
         [HttpGet]
         [Route("get-all")]
-        public async Task<IActionResult> GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
-            var employees = await _dbContext.GetAllEmployees();
-            return Ok(employees);
+            if (pageIndex < 1 || pageSize < 1)
+            {
+                return BadRequest(new BaseResponse<string>(null, "PageNumber and PageSize must be greater than 0", false));
+            }
+
+            var (employees, totalPages) = await _dbContext.GetAllEmployees(pageSize, pageIndex);
+
+            var pageData = new PaginationResponse<Employee>(employees, pageIndex, totalPages);
+
+            return Ok(new BaseResponse<PaginationResponse<Employee>>(pageData, "Success !", true));
         }
 
         [HttpGet]
@@ -32,9 +41,9 @@ namespace WebApplication.Controllers
         {
             var employee = await _dbContext.GetEmployeeById(id);
 
-            if (employee == null) return NotFound();
+            if (employee == null) return NotFound(new BaseResponse<string>(null, "Not found !", false));
 
-            return Ok(employee);
+            return Ok(new BaseResponse<Employee>(employee, "success", true));
         }
 
         [Authorize]
@@ -51,7 +60,7 @@ namespace WebApplication.Controllers
 
             var result = await _dbContext.AddEmployee(employee);
 
-            return result > 0 ? Ok(employee) : BadRequest("Create employee failed!");
+            return result > 0 ? Ok(new BaseResponse<Employee>(employee, "success", true)) : BadRequest(new BaseResponse<string>(null, "Create employee failed!", false));
         }
 
         [Authorize]
@@ -77,13 +86,13 @@ namespace WebApplication.Controllers
 
             if (employee == 0)
             {
-                return NotFound("Not found employee!");
+                return NotFound(new BaseResponse<string>(null, "Not found employee!", false));
             }
 
-            return Ok("Update successed!");
+            return Ok(new BaseResponse<string>(null, "Update successed!", true));
         }
 
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpDelete]
         [Route("delete/{id:guid}")]
         public async Task<IActionResult> DeleteEmployee(Guid id)
@@ -92,11 +101,10 @@ namespace WebApplication.Controllers
 
             if (employee == 0)
             {
-                return NotFound("Not found employee!");
+                return NotFound(new BaseResponse<string>(null, "Not found employee!", false));
             }
-            ;
 
-            return Ok("Delete successed!");
+            return Ok(new BaseResponse<string>(null, "Delete successed!", true));
         }
     }
 }

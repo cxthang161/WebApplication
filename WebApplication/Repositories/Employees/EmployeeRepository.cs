@@ -13,11 +13,22 @@ namespace WebApplication.Repositories.Employees
             _dbContext = configuration.GetConnectionString("DefaultCollection");
         }
 
-        public async Task<IEnumerable<Employee>> GetAllEmployees()
+        public async Task<(IEnumerable<Employee>, int)> GetAllEmployees(int pageSize, int pageIndex)
         {
             using var connection = new SqlConnection(_dbContext);
-            string sql = "SELECT * FROM Employees";
-            return await connection.QueryAsync<Employee>(sql);
+
+            string countQuery = "SELECT COUNT(*) FROM Employees";
+            int totalRecords = await connection.ExecuteScalarAsync<int>(countQuery);
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            string sql = "SELECT * FROM Employees ORDER BY Name OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+            var employees = await connection.QueryAsync<Employee>(sql, new
+            {
+                Offset = (pageIndex - 1) * pageSize,
+                PageSize = pageSize
+            });
+
+            return (employees, totalPages);
         }
 
         public async Task<Employee?> GetEmployeeById(Guid id)
