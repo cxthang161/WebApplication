@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication.Models.Common;
@@ -105,6 +106,48 @@ namespace WebApplication.Controllers
             }
 
             return Ok(new BaseResponse<string>(null, "Delete successed!", true));
+        }
+
+        [Authorize]
+        [HttpGet("export-pdf")]
+        public async Task<IActionResult> ExportEmployeesToPdf()
+        {
+            var employees = await _dbContext.GetAllEmployees(1, 100);
+
+            using var stream = new MemoryStream();
+            var document = new iTextSharp.text.Document();
+            var writer = PdfWriter.GetInstance(document, stream);
+
+            document.Open();
+
+            var titleFont = iTextSharp.text.FontFactory.GetFont("Arial", 16, iTextSharp.text.Font.BOLD);
+            var title = new iTextSharp.text.Paragraph("Danh sách nhân viên", titleFont)
+            {
+                Alignment = iTextSharp.text.Element.ALIGN_CENTER,
+                SpacingAfter = 20f
+            };
+            document.Add(title);
+
+            var table = new PdfPTable(3);
+            table.WidthPercentage = 100;
+            table.AddCell("Name");
+            table.AddCell("Job");
+            table.AddCell("DOB");
+
+            foreach (var employee in employees.Item1)
+            {
+                table.AddCell(employee.Name);
+                table.AddCell(employee.Job ?? "");
+                table.AddCell(employee.DOB?.ToString("dd/MM/yyyy") ?? "");
+            }
+
+            document.Add(table);
+            document.Close();
+            writer.Close();
+
+            stream.Position = 0;
+
+            return File(stream.ToArray(), "application/pdf", "Employees.pdf");
         }
     }
 }
